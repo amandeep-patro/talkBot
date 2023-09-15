@@ -1,0 +1,111 @@
+#include <iostream>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <cstdlib>
+#include<windows.h>
+#include<mmsystem.h>
+#include<stdio.h>
+
+using namespace std;
+
+int main() {
+    cout<<":::::::::::::::::::::::::::::::::::::::::::::::::::WELCOME::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::";
+
+    string k;
+    cout << "YOU: ";
+    getline(cin, k);
+
+    if (k == "open file") {
+        string l;
+        cout << "Enter the file path: ";
+        getline(cin, l);
+        ShellExecute(NULL, "open", l.c_str(), NULL, NULL, SW_NORMAL);
+    }
+
+    else if (k=="shutdown"){
+        system("C:\\WINDOWS\\System32\\shutdown -s -t 2");
+    }
+    else if (k=="restart"){
+        system("C:\\WINDOWS\\System32\\shutdown -r -t 2");
+    }
+    else if (k=="internet search"){
+        string j;
+        cout << "Enter a search query: ";
+        getline(cin, j);
+        string url1 = "https://www.google.com/search?q=" + j;
+        string url2 = "https://www.youtube.com/search?q=" + j;
+        ShellExecute(NULL, "open", url1.c_str(), NULL, NULL, SW_SHOWNORMAL);
+        ShellExecute(NULL, "open", url2.c_str(), NULL, NULL, SW_SHOWNORMAL);
+    }
+
+    else{
+        const int MAX_RESPONSES = 1000;
+        string filename = "responses.txt";
+        string inputs[MAX_RESPONSES];
+        string responses[MAX_RESPONSES];
+        int num_responses = 0;
+
+
+
+        // read existing responses
+        ifstream infile(filename);
+        if (infile.is_open()) {
+            string input, response;
+            while (getline(infile, input) && num_responses < MAX_RESPONSES) {
+                getline(infile, response);
+                inputs[num_responses] = input;
+                responses[num_responses] = response;
+                num_responses++;
+            }
+            infile.close();
+        }
+
+        // interact and save responses
+
+        string input;
+        while (true) {
+            cout << "You: ";
+            getline(cin, input);
+
+            if (input == "exit") {
+                cout << "Chatbot: Goodbye!" << endl;
+                exit(0);
+            }
+
+            bool found_response = false;
+            for (int i = 0; i < num_responses; i++) {
+                if (inputs[i] == input) {
+                    cout << "Chatbot: " << responses[i] << endl;
+                    found_response = true;
+                    break;
+                }
+            }
+
+            if (!found_response) {
+                string response;
+                cout << "Chatbot: I don't know the answer. Please provide a response: ";
+                getline(cin, response);
+                inputs[num_responses] = input;
+                responses[num_responses] = response;
+                num_responses++;
+
+                // write new response to file
+                ofstream outfile(filename, ios_base::app);
+                if (outfile.is_open()) {
+                    outfile << input << endl;
+                    outfile << response << endl;
+                    outfile.close();
+                    cout << "Response added to file." << endl;
+                } else {
+                    cout << "Error: unable to open file for writing." << endl;
+                }
+
+                cout << "Chatbot: Thanks! I'll remember that." << endl;
+            }
+        }
+    }
+
+
+    return 0;
+}
